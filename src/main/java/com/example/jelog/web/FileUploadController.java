@@ -14,14 +14,17 @@ import java.io.File;
 public class FileUploadController {
 
     private final String UPLOAD_DIR = "uploads/";
-    private final String ACCESS_PATH = "http://localhost:8080/api/images/";
+    private final String ACCESS_PATH = "http://118.67.132.220:8080/api/images/";
 
     @PostMapping("/api/uploadImage")
     public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
         try {
             File directory = new File(UPLOAD_DIR);
             if (!directory.exists()) {
-                directory.mkdirs(); // creates directory including any necessary but nonexistent parent directories
+                boolean dirCreated = directory.mkdirs();
+                if(!dirCreated){
+                    throw new Exception("Failed to create directory:: " + directory.getAbsolutePath());
+                }
             }
 
             System.out.println("UPLOAD DIRECTORY: " + directory.getAbsolutePath()); // 절대 경로 출력
