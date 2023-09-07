@@ -32,6 +32,7 @@ public class FileUploadController {
 
             String fileName = file.getOriginalFilename();
             String filePath = UPLOAD_DIR + fileName;
+            System.out.println("FILEPATH ::: " + filePath);
             File dest = new File(filePath);
             file.transferTo(dest);
 
