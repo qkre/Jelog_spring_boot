@@ -1,20 +1,25 @@
 spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/jelog?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&useSSL=true
+    username: root
+    password: a3202415500
+
   jpa:
+    database: mysql
+    show-sql: true
+    hibernate:
+      ddl-auto: update
     properties:
       hibernate:
+        show_sql: false
         format_sql: true
-    defer-datasource-initialization: true
-  datasource:
-    url: jdbc:h2:mem:test
-    username: sarumani
-  h2:
-    console:
-      enabled: true
+
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
-  rsocket:
-    server:
-      address: 118.67.132.220
-      port: 8080
+
+jwt:
+  secret: qkre2018qkre2018qkre2018qkre2018qkre2018qkre2018qkre2018
+

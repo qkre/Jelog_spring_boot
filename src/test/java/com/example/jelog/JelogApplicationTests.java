@@ -1,9 +1,6 @@
 package com.example.jelog;
 
 import com.example.jelog.domain.account.Account;
-import com.example.jelog.repository.AccountRepository;
-import com.example.jelog.service.AccountService;
-import com.example.jelog.web.dto.AddAccountRequestDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
