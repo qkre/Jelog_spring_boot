@@ -26,7 +26,6 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         final String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        logger.info("Authorization : " + authorization);
 
         if(authorization == null || !authorization.startsWith("Bearer ")){
             logger.error("Authorization 이 없습니다.");
@@ -42,6 +41,9 @@ public class JwtFilter extends OncePerRequestFilter {
             logger.error("만료된 Token 입니다.");
             filterChain.doFilter(request, response);
         }
+
+        logger.info("유효 토큰 입니다.");
+
 
         // UserEmail 꺼내기
         String userEmail = "";
