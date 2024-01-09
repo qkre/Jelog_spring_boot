@@ -24,7 +24,7 @@ public class UserService {
     private final BCryptPasswordEncoder encoder;
 
     // C : 회원 등록
-    public Long register(AddUserRequestDto requestDto){
+    public Long register(AddUserRequestDto requestDto) {
         userRepository.findByUserEmail(requestDto.getUserEmail()).ifPresent(user -> {
             throw new AppException(ErrorCode.USEREMAIL_DUPLICATED, requestDto.getUserEmail() + "는 이미 존재하는 계정입니다.");
         });
@@ -39,25 +39,30 @@ public class UserService {
     }
 
     // R : 로그인
-    public String login(LoginRequestDto requestDto){
+    public String login(LoginRequestDto requestDto) {
         User user = userRepository.findByUserEmail(requestDto.getUserEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USEREMAIL_NOTEXIST, requestDto.getUserEmail() + "는 존재하지 않는 계정입니다."));
 
-        if(!encoder.matches(requestDto.getUserPw(), user.getUserPw())){
+        if (!encoder.matches(requestDto.getUserPw(), user.getUserPw())) {
             throw new AppException(ErrorCode.INVALID_PASSWORD, "패스워드가 일치하지 않습니다.");
         }
 
         return JwtUtil.createJwt(requestDto.getUserEmail(), secretKey, expiredMs);
-   }
+    }
+
+    public User findByEmail(String userEmail) {
+        User user = userRepository.findByUserEmail(userEmail).orElseThrow(() -> new AppException(ErrorCode.USEREMAIL_NOTEXIST, userEmail + "는 존재하지 않는 계정입니다."));
+        return user;
+    }
 
     // U : 회원 정보 변경
 
     // D : 회원 삭제
-    public boolean delete(Long userId){
+    public boolean delete(Long userId) {
         try {
             userRepository.deleteById(userId);
             return true;
-        } catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
     }
