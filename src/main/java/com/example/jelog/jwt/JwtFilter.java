@@ -1,6 +1,8 @@
 package com.example.jelog.jwt;
 
 import com.example.jelog.service.user.UserService;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,7 +21,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
-    private final UserService userService;
     private final String secretKey;
 
     @Override
@@ -45,8 +46,8 @@ public class JwtFilter extends OncePerRequestFilter {
         logger.info("유효 토큰 입니다.");
 
 
-        // UserEmail 꺼내기
-        String userEmail = "";
+        // UserEmail 꺼내기;
+        String userEmail = JwtUtil.getClaimUserEmail(token, secretKey);
 
         // 권한 부여
         UsernamePasswordAuthenticationToken authenticationToken =

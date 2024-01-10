@@ -32,7 +32,7 @@ public class WebSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(requests -> {
-                    requests.requestMatchers("/api/user/login", "/api/user/register", "/api/user/valid", "/api/post/read", "/api/jwt/**").permitAll();
+                    requests.requestMatchers("/api/user/login", "/api/user/register", "/api/user/valid", "/api/post/all", "/api/jwt/*").permitAll();
                     requests.anyRequest().authenticated();
                 })
                 .sessionManagement(
