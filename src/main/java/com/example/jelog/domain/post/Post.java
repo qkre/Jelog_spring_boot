@@ -6,8 +6,14 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Table
 @Entity
@@ -23,15 +29,33 @@ public class Post {
     private User user;
 
     @Column
+    @CreatedDate
+    private LocalDateTime createdAt;
+
+    @Column
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
+
+    @Column
     private String title;
 
     @Column
     private String content;
 
+    @Column
+    private String tags;
+
     @Builder
-    public Post(User user, String title, String content) {
+    public Post(User user, String title, String content, String tags) {
         this.user = user;
         this.title = title;
         this.content = content;
+        this.tags = tags;
+    }
+
+    public void update(String title, String content, String tags){
+        this.title = title;
+        this.content = content;
+        this.tags = tags;
     }
 }
