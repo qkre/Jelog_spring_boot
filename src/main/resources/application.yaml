@@ -23,3 +23,7 @@ spring:
 jwt:
   secret: qkre2018qkre2018qkre2018qkre2018qkre2018qkre2018qkre2018
 
+file:
+  upload-dir: upload/
+  access-path: http://localhost:8080/api/image/download
+

@@ -29,6 +29,7 @@ dependencies {
     implementation 'com.mysql:mysql-connector-j'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.0-rc1'
 
     compileOnly 'org.projectlombok:lombok'
 
