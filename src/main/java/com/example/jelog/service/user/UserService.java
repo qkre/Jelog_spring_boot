@@ -32,6 +32,7 @@ public class UserService {
         return userRepository.save(
                 User.builder()
                         .userEmail(requestDto.getUserEmail())
+                        .userNickName(requestDto.getUserEmail().split("@")[0])
                         .userPw(encoder.encode(requestDto.getUserPw()))
                         .userIcon(requestDto.getUserIcon())
                         .build()

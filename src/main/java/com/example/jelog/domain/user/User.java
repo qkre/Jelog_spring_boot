@@ -19,14 +19,18 @@ public class User {
     private String userEmail;
 
     @Column
+    private String userNickName;
+
+    @Column
     private String userPw;
 
     @Column
     private String userIcon;
 
     @Builder
-    public User(String userEmail, String userPw, String userIcon) {
+    public User(String userEmail, String userNickName, String userPw, String userIcon) {
         this.userEmail = userEmail;
+        this.userNickName = userNickName;
         this.userPw = userPw;
         this.userIcon = userIcon;
     }
