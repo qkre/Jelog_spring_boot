@@ -1,6 +1,7 @@
 package com.example.jelog.domain.post;
 
 import com.example.jelog.domain.user.User;
+import com.example.jelog.utils.StringListConverter;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -11,6 +12,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
@@ -43,17 +45,18 @@ public class Post {
     private String content;
 
     @Column
-    private String tags;
+    @Convert(converter = StringListConverter.class)
+    private List<String> tags;
 
     @Builder
-    public Post(User user, String title, String content, String tags) {
+    public Post(User user, String title, String content, List<String> tags) {
         this.user = user;
         this.title = title;
         this.content = content;
         this.tags = tags;
     }
 
-    public void update(String title, String content, String tags){
+    public void update(String title, String content, List<String> tags){
         this.title = title;
         this.content = content;
         this.tags = tags;
