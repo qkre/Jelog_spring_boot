@@ -38,6 +38,13 @@ public class PostService {
         return postRepository.findAllByOrderByCreatedAtDesc().orElseThrow(() -> new AppException(ErrorCode.POSTS_NOTEXIST, "포스트가 존재하지 않습니다."));
     }
 
+    public Post getPost(String userNickName, Long postId){
+        User user = userRepository.findByUserNickName(userNickName).orElseThrow(
+                () -> new AppException(ErrorCode.USEREMAIL_NOTEXIST, userNickName + "는 존재하지 않는 계정입니다.")
+        );
+
+        return postRepository.findByUserAndPostId(user, postId).orElseThrow(() -> new AppException(ErrorCode.POSTS_NOTEXIST, "포스트가 존재하지 않습니다."));
+    }
 
     // U
 

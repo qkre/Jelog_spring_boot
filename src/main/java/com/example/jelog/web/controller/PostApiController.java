@@ -32,6 +32,12 @@ public class PostApiController {
         });
 
         return ResponseEntity.ok(posts);
+    }
 
+    @GetMapping("/read/{userNickName}/{postId}")
+    public ResponseEntity<Post> getPost(@PathVariable String userNickName, @PathVariable Long postId){
+        Post post = postService.getPost(userNickName, postId);
+        post.getUser().setUserPw(null);
+        return ResponseEntity.ok(post);
     }
 }
