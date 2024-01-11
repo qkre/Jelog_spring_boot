@@ -32,13 +32,20 @@ public class WebSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(requests -> {
-                    requests.requestMatchers("/api/user/login", "/api/user/register", "/api/user/valid", "/api/post/all", "/api/jwt/*").permitAll();
+                    requests.requestMatchers(
+                            "/api/user/login",
+                            "/api/user/register",
+                            "/api/user/valid",
+                            "/api/post/all",
+                            "/api/post/read/**",
+                            "/api/jwt/*",
+                            "/api/image/download").permitAll();
                     requests.anyRequest().authenticated();
                 })
                 .sessionManagement(
                         sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .addFilterBefore(new JwtFilter(userService, secretKey), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtFilter(secretKey), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 }
