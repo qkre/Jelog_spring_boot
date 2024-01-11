@@ -30,9 +30,9 @@ public class Image {
     private String fileName;
 
     @Builder
-    public Image(Post post, User user, String file_name) {
+    public Image(Post post, User user, String fileName) {
         this.post = post;
         this.user = user;
-        this.fileName = file_name;
+        this.fileName = fileName;
     }
 }
