@@ -1,7 +1,12 @@
 package com.example.jelog.domain.user;
 
+import com.example.jelog.domain.post.Post;
+import com.example.jelog.domain.post.PostLike;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
+import java.util.Set;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -26,6 +31,10 @@ public class User {
 
     @Column
     private String userIcon;
+
+    @Column
+    private String role;
+
 
     @Builder
     public User(String userEmail, String userNickName, String userPw, String userIcon) {
