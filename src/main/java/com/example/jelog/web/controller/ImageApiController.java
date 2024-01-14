@@ -1,6 +1,5 @@
 package com.example.jelog.web.controller;
 
-import com.example.jelog.service.image.ImageService;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +20,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/image")
 public class ImageApiController {
-    private ImageService imageService;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
