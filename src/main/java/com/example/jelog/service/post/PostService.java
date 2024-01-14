@@ -14,8 +14,7 @@ import com.example.jelog.web.dto.UnlikePostRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -27,7 +26,7 @@ public class PostService {
     // C
     public Long write(AddPostRequestDto requestDto) {
         User user = userRepository.findByUserEmail(requestDto.getUserEmail()).orElseThrow(
-                () -> new AppException(ErrorCode.USEREMAIL_NOTEXIST, "존재하지 않는 계정입니다."));
+                () -> new AppException(ErrorCode.USER_DONT_EXIST, "존재하지 않는 계정입니다."));
 
         return postRepository.save(
                 Post.builder()
@@ -40,7 +39,7 @@ public class PostService {
     }
 
     public boolean likePost(LikePostRequestDto requestDto) {
-        Post post = postRepository.findById(requestDto.getPostId()).orElseThrow(() -> new AppException(ErrorCode.POSTS_NOTEXIST, "존재하지 않는 포스터"));
+        Post post = postRepository.findById(requestDto.getPostId()).orElseThrow(() -> new AppException(ErrorCode.POSTS_DONT_EXIST, "존재하지 않는 포스터"));
 
         Set<PostLike> postLikes = post.getPostLike();
 
@@ -57,7 +56,7 @@ public class PostService {
     }
 
     public boolean unLikePost(UnlikePostRequestDto requestDto) {
-        Post post = postRepository.findById(requestDto.getPostId()).orElseThrow(() -> new AppException(ErrorCode.POSTS_NOTEXIST, "존재하지 않는 포스트"));
+        Post post = postRepository.findById(requestDto.getPostId()).orElseThrow(() -> new AppException(ErrorCode.POSTS_DONT_EXIST, "존재하지 않는 포스트"));
 
         Set<PostLike> postLikes = post.getPostLike();
 
@@ -77,7 +76,7 @@ public class PostService {
 
     // R
     public List<Post> getPostsOrderByCreatedAtDesc() {
-        List<Post> posts = postRepository.findAllByOrderByCreatedAtDesc().orElseThrow(() -> new AppException(ErrorCode.POSTS_NOTEXIST, "포스트가 존재하지 않습니다."));
+        List<Post> posts = postRepository.findAllByOrderByCreatedAtDesc().orElseThrow(() -> new AppException(ErrorCode.POSTS_DONT_EXIST, "포스트가 존재하지 않습니다."));
         if(!posts.isEmpty()) {
             posts.forEach(post -> post.getUser().setUserPw(null));
         }
@@ -86,16 +85,47 @@ public class PostService {
 
     }
 
-//    public List<Post> getPostsOrderByPostLikes(){
-//
-//    }
+    public List<Post> getPostsByUserId(Long userId){
+        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_DONT_EXIST, "존재하지 않는 계정입니다."));
+        List<Post> posts = postRepository.findByUser(user).orElseThrow(() -> new AppException(ErrorCode.POSTS_DONT_EXIST, "포스트가 존재하지 않습니다."));
+
+        posts.forEach(post -> post.getUser().setUserPw(null));
+
+        return posts;
+    }
+
+    public Map<String, Post> getRecentPostsByUserId(Long userId, Long postId){
+        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_DONT_EXIST, "존재하지 않는 계정입니다."));
+        List<Post> posts = postRepository.findByUserOrderByCreatedAtAsc(user).orElseThrow(() -> new AppException(ErrorCode.POSTS_DONT_EXIST, "포스트가 존재하지 않습니다."));
+
+
+
+        int postIdx = -1;
+
+        for(int i = 0; i < posts.size(); i++){
+            if(posts.get(i).getPostId().equals(postId)){
+                postIdx = i;
+                break;
+            }
+        }
+
+        Post prev = (postIdx > 0) ? posts.get(postIdx - 1) : null;
+        Post next = (postIdx < posts.size() - 1) ? posts.get(postIdx + 1) : null;
+
+        Map<String, Post> recentPosts = new HashMap<>();
+
+        recentPosts.put("prev", prev);
+        recentPosts.put("next", next);
+
+        return recentPosts;
+    }
 
     public Post getPost(String userNickName, Long postId) {
         User user = userRepository.findByUserNickName(userNickName).orElseThrow(
-                () -> new AppException(ErrorCode.USEREMAIL_NOTEXIST, userNickName + "는 존재하지 않는 계정입니다.")
+                () -> new AppException(ErrorCode.USER_DONT_EXIST, userNickName + "는 존재하지 않는 계정입니다.")
         );
 
-        Post post = postRepository.findByUserAndPostId(user, postId).orElseThrow(() -> new AppException(ErrorCode.POSTS_NOTEXIST, "포스트가 존재하지 않습니다."));
+        Post post = postRepository.findByUserAndPostId(user, postId).orElseThrow(() -> new AppException(ErrorCode.POSTS_DONT_EXIST, "포스트가 존재하지 않습니다."));
 
         post.getUser().setUserPw(null);
 

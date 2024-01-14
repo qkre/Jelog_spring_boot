@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -29,19 +30,33 @@ public class PostApiController {
     @GetMapping("/all")
     public ResponseEntity<List<Post>> getPosts(@RequestParam String orderBy){
         List<Post> posts = postService.getPostsOrderByCreatedAtDesc();
-//        posts.forEach(post -> {
-//            post.getUser().setUserPw(null);
-//        });
+        posts.forEach(post -> {
+            post.getUser().setUserPw(null);
+        });
 
         return ResponseEntity.ok(posts);
     }
 
+    @GetMapping("/all/by")
+    public ResponseEntity<List<Post>> getPostsByUserId(@RequestParam Long userId) {
+        List<Post> posts = postService.getPostsByUserId(userId);
+
+        return ResponseEntity.ok(posts);
+    }
+
+    @GetMapping("/recent")
+    public ResponseEntity<Map<String, Post>> getRecentPosts(@RequestParam Long userId, @RequestParam Long postId){
+        Map<String, Post> recentPosts = postService.getRecentPostsByUserId(userId, postId);
+
+        return ResponseEntity.ok(recentPosts);
+    }
     @GetMapping("/read/{userNickName}/{postId}")
     public ResponseEntity<Post> getPost(@PathVariable String userNickName, @PathVariable Long postId){
         Post post = postService.getPost(userNickName, postId);
 //        post.getUser().setUserPw(null);
         return ResponseEntity.ok(post);
     }
+
 
     // 게시글 추천하기
     @PostMapping("/like/add")

@@ -37,8 +37,10 @@ public class WebSecurityConfig {
                             "/api/user/register",
                             "/api/user/valid",
                             "/api/post/all",
+                            "/api/post/all/**",
+                            "/api/post/recent",
                             "/api/post/read/**",
-                            "/api/jwt/*",
+                            "/api/jwt/**",
                             "/api/image/download").permitAll();
                     requests.anyRequest().authenticated();
                 })
