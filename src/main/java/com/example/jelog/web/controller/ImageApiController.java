@@ -41,8 +41,6 @@ public class ImageApiController {
             File destination = new File(filePath);
             file.transferTo(destination);
 
-            System.out.println("destination = " + destination);
-
             Map<String, String> response = new HashMap<>();
 
             response.put("accessPath", accessPath);
