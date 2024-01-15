@@ -18,7 +18,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/image")
+@RequestMapping("/api/private/image")
 public class ImageApiController {
 
     @Value("${file.upload-dir}")

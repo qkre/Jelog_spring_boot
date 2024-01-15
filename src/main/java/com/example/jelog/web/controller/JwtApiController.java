@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/jwt")
+@RequestMapping("/api/public/jwt")
 public class JwtApiController {
 
     @Value("${jwt.secret}")

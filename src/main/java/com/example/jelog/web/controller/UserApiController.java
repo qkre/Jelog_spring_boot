@@ -2,24 +2,25 @@ package com.example.jelog.web.controller;
 
 import com.example.jelog.domain.user.User;
 import com.example.jelog.service.user.UserService;
-import com.example.jelog.web.dto.AddUserRequestDto;
-import com.example.jelog.web.dto.LoginRequestDto;
+import com.example.jelog.web.dto.user.AddUserRequestDto;
+import com.example.jelog.web.dto.user.DeleteUserRequestDto;
+import com.example.jelog.web.dto.user.GetUserDetailRequestDto;
+import com.example.jelog.web.dto.user.LoginRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api")
 public class UserApiController {
 
     private final UserService userService;
 
     // 회원 가입
-    @PostMapping("/register")
+    @PostMapping("/public/user")
     public ResponseEntity<String> signUp(@RequestBody AddUserRequestDto requestDto){
         Long userId = userService.register(requestDto);
 
@@ -27,16 +28,16 @@ public class UserApiController {
     }
 
     // 회원 탈퇴
-    @DeleteMapping("/{userId}/delete")
-    public ResponseEntity<String> delete(@PathVariable Long userId){
-        if(userService.delete(userId)){
-            return ResponseEntity.ok(String.format("회원 번호 %d 번 님이 탈퇴 하셨습니다.", userId));
+    @DeleteMapping("/private/user")
+    public ResponseEntity<String> delete(@RequestBody DeleteUserRequestDto requestDto){
+        if(userService.delete(requestDto)){
+            return ResponseEntity.ok("회원 탈퇴 완료");
         }
         return ResponseEntity.badRequest().body("올바른 요청이 아닙니다.");
     }
 
     // 로그인
-    @PostMapping("/login")
+    @PostMapping("/public/user/login")
     public ResponseEntity<HashMap<String, String>> login(@RequestBody LoginRequestDto requestDto){
         String token = userService.login(requestDto);
         HashMap<String, String> response = new HashMap<>();
@@ -46,18 +47,18 @@ public class UserApiController {
     }
 
     // 계정 정보
-    @GetMapping("/detail")
-    public ResponseEntity<User> getUserData(@RequestParam String userEmail){
-        User user = userService.findByEmail(userEmail);
+    @GetMapping("/private/user")
+    public ResponseEntity<User> getUserDetail(@RequestParam String userEmail, @RequestParam String token){
+        User user = userService.findByEmail(userEmail, token);
         user.setUserPw(null);
         return ResponseEntity.ok(user);
     }
 
     // ID 조회
-    @GetMapping("/valid")
+    @GetMapping("/public/user/valid")
     public ResponseEntity<Boolean> userEmailValidCheck(@RequestParam String userEmail){
-        System.out.println("userEmail = " + userEmail);
-        userService.findByEmail(userEmail);
-        return ResponseEntity.ok(false);
+        boolean result = userService.userEmailValidCheck(userEmail);
+        return ResponseEntity.ok(result);
     }
+
 }
