@@ -1,4 +1,4 @@
-package com.example.jelog.web.dto;
+package com.example.jelog.web.dto.user;
 
 import lombok.Getter;
 import lombok.Setter;
