@@ -28,8 +28,18 @@ public class JwtUtil {
                 .before(new Date());
     }
 
+    public static boolean isTokenOwner(String token, String secretKey, String userEmail) {
+        String tokenOwner = getClaimUserEmail(token, secretKey);
+        return userEmail.equals(tokenOwner);
+    }
+
     public static String getClaimUserEmail(String token, String secretKey) {
-        return Jwts.parser().setSigningKey(secretKey).build().parseClaimsJws(token).getBody().get("userEmail", String.class);
+        return Jwts.parser()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("userEmail", String.class);
     }
 
 }

@@ -43,11 +43,15 @@ public class JwtFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         }
 
+        // UserEmail 꺼내기;
+        String userEmail = JwtUtil.getClaimUserEmail(token, secretKey);
+
+        logger.info(userEmail);
+
         logger.info("유효 토큰 입니다.");
 
 
-        // UserEmail 꺼내기;
-        String userEmail = JwtUtil.getClaimUserEmail(token, secretKey);
+
 
         // 권한 부여
         UsernamePasswordAuthenticationToken authenticationToken =
