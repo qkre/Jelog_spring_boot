@@ -1,5 +1,6 @@
 package com.example.jelog.domain.post;
 
+import com.example.jelog.domain.comment.Comment;
 import com.example.jelog.domain.user.User;
 import com.example.jelog.utils.StringListConverter;
 import jakarta.persistence.*;
@@ -9,7 +10,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -32,7 +32,11 @@ public class Post {
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "post_id")
-    private Set<PostLike> postLike;
+    private List<Comment> comments;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "post_id")
+    private Set<PostLike> postLikes;
 
     @Column
     @CreatedDate
