@@ -19,10 +19,10 @@ public class PostLike {
     private Long postLikeId;
 
     @Column
-    private Long userId;
+    private String userEmail;
 
     @Builder
-    public PostLike(Long userId) {
-        this.userId = userId;
+    public PostLike(String userEmail) {
+        this.userEmail = userEmail;
     }
 }
