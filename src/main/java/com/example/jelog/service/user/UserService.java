@@ -5,8 +5,10 @@ import com.example.jelog.exception.AppException;
 import com.example.jelog.exception.ErrorCode;
 import com.example.jelog.jwt.JwtUtil;
 import com.example.jelog.repository.UserRepository;
-import com.example.jelog.web.dto.AddUserRequestDto;
-import com.example.jelog.web.dto.LoginRequestDto;
+import com.example.jelog.web.dto.user.AddUserRequestDto;
+import com.example.jelog.web.dto.user.DeleteUserRequestDto;
+import com.example.jelog.web.dto.user.GetUserDetailRequestDto;
+import com.example.jelog.web.dto.user.LoginRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -18,7 +20,7 @@ public class UserService {
 
     @Value("${jwt.secret}")
     private String secretKey;
-    private Long expiredMs = 1000 * 60 * 60L;
+    private Long expiredMs = 1000 * 30 * 60 * 60L;
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
@@ -41,6 +43,7 @@ public class UserService {
 
     // R : 로그인
     public String login(LoginRequestDto requestDto) {
+
         User user = userRepository.findByUserEmail(requestDto.getUserEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_DONT_EXIST, requestDto.getUserEmail() + "는 존재하지 않는 계정입니다."));
 
@@ -51,17 +54,34 @@ public class UserService {
         return JwtUtil.createJwt(requestDto.getUserEmail(), secretKey, expiredMs);
     }
 
-    public User findByEmail(String userEmail) {
-        User user = userRepository.findByUserEmail(userEmail).orElseThrow(() -> new AppException(ErrorCode.USER_DONT_EXIST, userEmail + "는 존재하지 않는 계정입니다."));
-        return user;
+    public User findByEmail(String userEmail, String token) {
+
+        if(!JwtUtil.isTokenOwner(token, secretKey, userEmail)){
+            throw new AppException(ErrorCode.WRONG_ACCEPT, "잘못된 요청입니다.");
+        }
+
+        return userRepository.findByUserEmail(userEmail).orElseThrow(
+                () -> new AppException(ErrorCode.USER_DONT_EXIST, "존재하지 않는 사용자")
+        );
     }
 
+    public boolean userEmailValidCheck(String userEmail) {
+        boolean isValid = userRepository.findByUserEmail(userEmail).isPresent();
+
+        return isValid;
+    }
     // U : 회원 정보 변경
 
     // D : 회원 삭제
-    public boolean delete(Long userId) {
+    public boolean delete(DeleteUserRequestDto requestDto) {
+        if(!JwtUtil.isTokenOwner(requestDto.getToken(), secretKey, requestDto.getUserEmail())){
+            throw new AppException(ErrorCode.WRONG_ACCEPT, "잘못된 접근입니다.");
+        }
         try {
-            userRepository.deleteById(userId);
+            User user = userRepository.findByUserEmail(requestDto.getUserEmail()).orElseThrow(
+                    () -> new AppException(ErrorCode.USER_DONT_EXIST, "존재하지 않는 유저입니다.")
+            );
+            userRepository.delete(user);
             return true;
         } catch (Exception e) {
             return false;
