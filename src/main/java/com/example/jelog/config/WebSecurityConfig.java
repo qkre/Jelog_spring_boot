@@ -33,15 +33,7 @@ public class WebSecurityConfig {
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(requests -> {
                     requests.requestMatchers(
-                            "/api/user/login",
-                            "/api/user/register",
-                            "/api/user/valid",
-                            "/api/post/all",
-                            "/api/post/all/**",
-                            "/api/post/recent",
-                            "/api/post/read/**",
-                            "/api/jwt/**",
-                            "/api/image/download").permitAll();
+                            "/api/public/**").permitAll();
                     requests.anyRequest().authenticated();
                 })
                 .sessionManagement(
