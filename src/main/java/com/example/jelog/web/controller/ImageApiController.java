@@ -18,7 +18,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/private/image")
+@RequestMapping("/api")
 public class ImageApiController {
 
     @Value("${file.upload-dir}")
@@ -27,7 +27,7 @@ public class ImageApiController {
     @Value("${file.access-path}")
     private String accessPath;
 
-    @PostMapping("/upload")
+    @PostMapping("/private/image/upload")
     public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file){
         try{
             File directory = new File(uploadDir);
@@ -48,12 +48,11 @@ public class ImageApiController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            e.printStackTrace();
             return ResponseEntity.badRequest().body(new HashMap<>());
         }
     }
 
-    @GetMapping("/download")
+    @GetMapping("/public/image/download")
     public ResponseEntity<Resource> downloadImage(@RequestParam String fileName){
         try{
             Path file = Paths.get(uploadDir).resolve(fileName).normalize();

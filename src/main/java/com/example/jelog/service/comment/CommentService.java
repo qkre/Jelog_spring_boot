@@ -20,8 +20,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class CommentService {
-    private final PostRepository postRepository;
     private final UserRepository userRepository;
+
+//    private final PostRepository postRepository;
+
 
     @Value("${jwt.secret}")
     private String secretKey;
@@ -32,21 +34,21 @@ public class CommentService {
             throw new AppException(ErrorCode.WRONG_ACCEPT, "잘못된 접근입니다.");
         }
 
-        User user = userRepository.findByUserEmail(requestDto.getUserEmail()).orElseThrow(
-                () -> new AppException(ErrorCode.USER_DONT_EXIST, "존재하지 않는 유저입니다.")
-        );
-        Post post = postRepository.findById(requestDto.getPostId()).orElseThrow(
-                () -> new AppException(ErrorCode.POSTS_DONT_EXIST, "존재하지 않는 포스터입니다."));
-
-        List<Comment> comments = post.getComments();
-
-        Comment newComment = Comment.builder()
-                .user(user)
-                .content(requestDto.getContent())
-                .build();
-        comments.add(newComment);
-
-        postRepository.save(post);
+//        User user = userRepository.findByUserEmail(requestDto.getUserEmail()).orElseThrow(
+//                () -> new AppException(ErrorCode.USER_DONT_EXIST, "존재하지 않는 유저입니다.")
+//        );
+//        Post post = postRepository.findById(requestDto.getPostId()).orElseThrow(
+//                () -> new AppException(ErrorCode.POSTS_DONT_EXIST, "존재하지 않는 포스터입니다."));
+//
+//        List<Comment> comments = post.getComments();
+//
+//        Comment newComment = Comment.builder()
+//                .user(user)
+//                .content(requestDto.getContent())
+//                .build();
+//        comments.add(newComment);
+//
+//        postRepository.save(post);
 
         return true;
     }
@@ -59,22 +61,22 @@ public class CommentService {
             throw new AppException(ErrorCode.WRONG_ACCEPT, "잘못된 접근입니다.");
         }
 
-        User user = userRepository.findByUserEmail(requestDto.getUserEmail()).orElseThrow(
-                () -> new AppException(ErrorCode.USER_DONT_EXIST, "존재하지 않는 유저입니다.")
-        );
-        Post post = postRepository.findById(requestDto.getPostId()).orElseThrow(
-                () -> new AppException(ErrorCode.POSTS_DONT_EXIST, "존재하지 않는 포스터입니다."));
-
-        List<Comment> comments = post.getComments();
-
-        for (Comment comment : comments) {
-            if (comment.getCommentId().equals(requestDto.getCommentId())) {
-                comment.update(requestDto.getContent());
-                break;
-            }
-        }
-
-        postRepository.save(post);
+//        User user = userRepository.findByUserEmail(requestDto.getUserEmail()).orElseThrow(
+//                () -> new AppException(ErrorCode.USER_DONT_EXIST, "존재하지 않는 유저입니다.")
+//        );
+//        Post post = postRepository.findById(requestDto.getPostId()).orElseThrow(
+//                () -> new AppException(ErrorCode.POSTS_DONT_EXIST, "존재하지 않는 포스터입니다."));
+//
+//        List<Comment> comments = post.getComments();
+//
+//        for (Comment comment : comments) {
+//            if (comment.getCommentId().equals(requestDto.getCommentId())) {
+//                comment.update(requestDto.getContent());
+//                break;
+//            }
+//        }
+//
+//        postRepository.save(post);
 
         return true;
 
