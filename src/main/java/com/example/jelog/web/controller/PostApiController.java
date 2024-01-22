@@ -7,8 +7,11 @@ import com.example.jelog.web.dto.post.DeletePostRequestDto;
 import com.example.jelog.web.dto.post.LikePostRequestDto;
 import com.example.jelog.web.dto.post.UnlikePostRequestDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 import java.util.Map;
@@ -30,9 +33,13 @@ public class PostApiController {
 
     // 글 불러오기
     @GetMapping("/public/post/all")
-    public ResponseEntity<List<Post>> getPosts(@RequestParam String orderBy){
-        List<Post> posts = postService.getPostsOrderByCreatedAtDesc();
-
+    public ResponseEntity<List<Post>> getPosts(@RequestParam String orderBy, @PageableDefault(size = 10, sort = "postId") Pageable pageable){
+        List<Post> posts;
+        if (orderBy.equals("createdAt")) {
+            posts = postService.getPostsOrderByCreatedAtDesc(pageable);
+        } else {
+            posts = postService.getPostsOrderByPostLikesAtDesc();
+        }
 
         return ResponseEntity.ok(posts);
     }
@@ -78,5 +85,11 @@ public class PostApiController {
         boolean result = postService.deletePost(requestDto);
 
         return ResponseEntity.ok("게시글이 삭제되었습니다.");
+    }
+
+    @GetMapping("/public/post/test")
+    public ResponseEntity<String> makeDummyData(){
+        postService.makeDummyData();
+        return ResponseEntity.ok("더미 데이터 생성 완료");
     }
 }

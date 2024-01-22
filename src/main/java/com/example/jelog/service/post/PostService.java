@@ -15,7 +15,10 @@ import com.example.jelog.web.dto.post.LikePostRequestDto;
 import com.example.jelog.web.dto.post.UnlikePostRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
 
 import java.util.*;
 
@@ -95,11 +98,22 @@ public class PostService {
     }
 
     // R
-    public List<Post> getPostsOrderByCreatedAtDesc() {
-        List<Post> posts = postRepository.findAllByOrderByCreatedAtDesc().orElseThrow(() -> new AppException(ErrorCode.POSTS_DONT_EXIST, "포스트가 존재하지 않습니다."));
+    public List<Post> getPostsOrderByCreatedAtDesc(Pageable pageable) {
+        List<Post> posts = postRepository.findAllByOrderByCreatedAtDesc(pageable).orElseThrow(
+                () -> new AppException(ErrorCode.POSTS_DONT_EXIST, "포스트가 존재하지 않습니다."));
         posts.forEach(post -> post.getUser().setUserPw(null));
         return posts;
+    }
 
+    public List<Post> getPostsOrderByPostLikesAtDesc(){
+        List<Post> posts = postRepository.findAll();
+        posts.sort(
+                Collections.reverseOrder(
+                        Comparator.comparingInt(
+                                post -> post.getPostLikes().size())
+                )
+        );
+        return posts;
     }
 
     public List<Post> getPostsByUserId(Long userId){
@@ -119,8 +133,6 @@ public class PostService {
     public Map<String, Post> getRecentPostsByUserId(Long userId, Long postId){
         User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_DONT_EXIST, "존재하지 않는 계정입니다."));
         List<Post> posts = postRepository.findByUserOrderByCreatedAtAsc(user).orElseThrow(() -> new AppException(ErrorCode.POSTS_DONT_EXIST, "포스트가 존재하지 않습니다."));
-
-
 
         int postIdx = -1;
 
@@ -170,5 +182,24 @@ public class PostService {
 
         postRepository.delete(post);
         return true;
+    }
+
+
+
+
+    public void makeDummyData(){
+        for (int i = 0; i < 300; i++){
+            User user = User.builder().userNickName(i+"번째 유저").build();
+
+            userRepository.save(user);
+
+            Post post = Post.builder()
+                    .user(user)
+                    .title(i + "번째 게시글")
+                    .content(i + "번째 내용")
+                    .build();
+
+            postRepository.save(post);
+        }
     }
 }
