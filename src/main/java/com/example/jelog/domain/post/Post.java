@@ -49,7 +49,7 @@ public class Post {
     @Column
     private String title;
 
-    @Column
+    @Column(length = 100000)
     private String content;
 
     @Column
