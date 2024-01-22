@@ -25,5 +25,5 @@ jwt:
 
 file:
   upload-dir: upload/
-  access-path: http://localhost:8080/api/image/download
+  access-path: http://localhost:8080/api/public/image/download
 
