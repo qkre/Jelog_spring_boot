@@ -15,8 +15,8 @@ import com.example.jelog.web.dto.post.LikePostRequestDto;
 import com.example.jelog.web.dto.post.UnlikePostRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 
@@ -26,26 +26,23 @@ import java.util.*;
 @Service
 public class PostService {
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
     private final PostLikeRepository postLikeRepository;
 
     @Value("${jwt.secret}")
     private String secretKey;
 
     // C
-    public boolean write(AddPostRequestDto requestDto) {
-        if(!JwtUtil.isTokenOwner(requestDto.getToken(), secretKey, requestDto.getUserEmail())){
-            throw new AppException(ErrorCode.WRONG_ACCEPT, "잘못된 접근입니다.");
+    public boolean write(AddPostRequestDto requestDto, User user) {
+        if (!JwtUtil.isTokenOwner(requestDto.getToken(), secretKey, requestDto.getUserEmail())) {
+            throw new AppException(ErrorCode.WRONG_ACCEPT);
         }
-
-        User user = userRepository.findByUserEmail(requestDto.getUserEmail()).orElseThrow(
-                () -> new AppException(ErrorCode.USER_DONT_EXIST, "존재하지 않는 계정입니다."));
 
         postRepository.save(
                 Post.builder()
                         .user(user)
                         .title(requestDto.getTitle())
                         .content(requestDto.getContent())
+                        .thumbnail(requestDto.getThumbnail())
                         .tags(requestDto.getTags())
                         .build()
         );
@@ -54,11 +51,11 @@ public class PostService {
     }
 
     public boolean likePost(LikePostRequestDto requestDto) {
-        if(!JwtUtil.isTokenOwner(requestDto.getToken(), secretKey, requestDto.getUserEmail())){
-            throw new AppException(ErrorCode.WRONG_ACCEPT, "잘못된 접근입니다.");
+        if (!JwtUtil.isTokenOwner(requestDto.getToken(), secretKey, requestDto.getUserEmail())) {
+            throw new AppException(ErrorCode.WRONG_ACCEPT);
         }
 
-        Post post = postRepository.findById(requestDto.getPostId()).orElseThrow(() -> new AppException(ErrorCode.POSTS_DONT_EXIST, "존재하지 않는 포스터"));
+        Post post = postRepository.findById(requestDto.getPostId()).orElseThrow(() -> new AppException(ErrorCode.POSTS_DONT_EXIST));
 
         Set<PostLike> postLikes = post.getPostLikes();
 
@@ -75,69 +72,86 @@ public class PostService {
     }
 
     public boolean unLikePost(UnlikePostRequestDto requestDto) {
-        if(!JwtUtil.isTokenOwner(requestDto.getToken(), secretKey, requestDto.getUserEmail())){
-            throw new AppException(ErrorCode.WRONG_ACCEPT, "잘못된 접근입니다.");
+        if (!JwtUtil.isTokenOwner(requestDto.getToken(), secretKey, requestDto.getUserEmail())) {
+            throw new AppException(ErrorCode.WRONG_ACCEPT);
         }
 
-        Post post = postRepository.findById(requestDto.getPostId()).orElseThrow(() -> new AppException(ErrorCode.POSTS_DONT_EXIST, "존재하지 않는 포스트"));
+        Post post = postRepository.findById(requestDto.getPostId()).orElseThrow(() -> new AppException(ErrorCode.POSTS_DONT_EXIST));
 
         Set<PostLike> postLikes = post.getPostLikes();
 
         boolean alreadyLikedUser = postLikes.stream().anyMatch(postLike -> postLike.getUserEmail().equals(requestDto.getUserEmail()));
 
-        if(alreadyLikedUser) {
-            PostLike target = postLikeRepository.findByPostIdAndUserEmail(requestDto.getPostId(), requestDto.getUserEmail()).orElseThrow(() -> new AppException(ErrorCode.WRONG_ACCEPT, "잘못된 접근"));
+        if (alreadyLikedUser) {
+            PostLike target = postLikeRepository.findByPostIdAndUserEmail(requestDto.getPostId(), requestDto.getUserEmail()).orElseThrow(() -> new AppException(ErrorCode.WRONG_ACCEPT));
 
             postLikes.remove(target);
 
             postRepository.save(post);
-           return true;
+            return true;
         }
 
         return false;
     }
 
     // R
-    public List<Post> getPostsOrderByCreatedAtDesc(Pageable pageable) {
-        List<Post> posts = postRepository.findAllByOrderByCreatedAtDesc(pageable).orElseThrow(
-                () -> new AppException(ErrorCode.POSTS_DONT_EXIST, "포스트가 존재하지 않습니다."));
+    public Page<Post> findAllOrderByCreatedAtDesc(Pageable pageable) {
+        Page<Post> posts = postRepository.findAllByOrderByCreatedAtDesc(pageable).orElseThrow(
+                () -> new AppException(ErrorCode.POSTS_DONT_EXIST));
         posts.forEach(post -> post.getUser().setUserPw(null));
         return posts;
     }
 
-    public List<Post> getPostsOrderByPostLikesAtDesc(){
-        List<Post> posts = postRepository.findAll();
-        posts.sort(
-                Collections.reverseOrder(
-                        Comparator.comparingInt(
-                                post -> post.getPostLikes().size())
-                )
-        );
+    public Page<Post> findAll(Pageable pageable) {
+        Page<Post> posts = postRepository.findAll(pageable);
+
         return posts;
     }
 
-    public List<Post> getPostsByUserId(Long userId){
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new AppException(ErrorCode.USER_DONT_EXIST, "존재하지 않는 계정입니다.")
-        );
-        List<Post> posts = postRepository.findByUser(user).orElseThrow(
-                () -> new AppException(ErrorCode.POSTS_DONT_EXIST, "포스트가 존재하지 않습니다.")
-        );
+    public List<Post> findByUserOrderByCreatedAt(User user, String orderBy) {
+        List<Post> posts = null;
+        if (orderBy.equals("desc")) {
+            posts = postRepository.findByUserOrderByCreatedAtDesc(user).orElseThrow(
+                    () -> new AppException(ErrorCode.POSTS_DONT_EXIST)
+            );
+        }
+        if (orderBy.equals("asc")) {
+            posts = postRepository.findByUserOrderByCreatedAtAsc(user).orElseThrow(
+                    () -> new AppException(ErrorCode.POSTS_DONT_EXIST));
+        }
 
+        assert posts != null;
         posts.forEach(post -> post.getUser().setUserPw(null));
 
 
         return posts;
     }
 
-    public Map<String, Post> getRecentPostsByUserId(Long userId, Long postId){
-        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_DONT_EXIST, "존재하지 않는 계정입니다."));
-        List<Post> posts = postRepository.findByUserOrderByCreatedAtAsc(user).orElseThrow(() -> new AppException(ErrorCode.POSTS_DONT_EXIST, "포스트가 존재하지 않습니다."));
+    public Map<String, Object> findByUser(User user) {
+        Map<String, Object> res = new HashMap<>();
+        List<Post> posts = findByUserOrderByCreatedAt(user, "desc");
+        int count = countPostsByUser(user);
+        posts.forEach(post -> post.setUser(null));
+        res.put("userNickName", user.getUserNickName());
+        res.put("userIntroduction", user.getUserIntroduction());
+        res.put("userIcon", user.getUserIcon());
+        res.put("postList", posts);
+        res.put("postCount", count);
+        return res;
+    }
+
+    public int countPostsByUser(User user) {
+        return postRepository.countByUser(user).orElseThrow(
+                () -> new AppException(ErrorCode.POSTS_DONT_EXIST));
+    }
+
+    public Map<String, Post> findRecentPostByUser(User user, Long postId) {
+        List<Post> posts = postRepository.findByUserOrderByCreatedAtAsc(user).orElseThrow(() -> new AppException(ErrorCode.POSTS_DONT_EXIST));
 
         int postIdx = -1;
 
-        for(int i = 0; i < posts.size(); i++){
-            if(posts.get(i).getPostId().equals(postId)){
+        for (int i = 0; i < posts.size(); i++) {
+            if (posts.get(i).getPostId().equals(postId)) {
                 postIdx = i;
                 break;
             }
@@ -154,12 +168,8 @@ public class PostService {
         return recentPosts;
     }
 
-    public Post getPost(String userNickName, Long postId) {
-        User user = userRepository.findByUserNickName(userNickName).orElseThrow(
-                () -> new AppException(ErrorCode.USER_DONT_EXIST, userNickName + "는 존재하지 않는 계정입니다.")
-        );
-
-        Post post = postRepository.findByUserAndPostId(user, postId).orElseThrow(() -> new AppException(ErrorCode.POSTS_DONT_EXIST, "포스트가 존재하지 않습니다."));
+    public Post findByUserAndPostId(User user, Long postId) {
+        Post post = postRepository.findByUserAndPostId(user, postId).orElseThrow(() -> new AppException(ErrorCode.POSTS_DONT_EXIST));
 
         post.getUser().setUserPw(null);
 
@@ -169,37 +179,16 @@ public class PostService {
     // U
 
     // D
-    public boolean deletePost(DeletePostRequestDto requestDto){
-        if(!JwtUtil.isTokenOwner(requestDto.getToken(), secretKey, requestDto.getUserEmail())){
-            throw new AppException(ErrorCode.WRONG_ACCEPT, "잘못된 접근입니다.");
+    public boolean deletePost(DeletePostRequestDto requestDto, User user) {
+        if (!JwtUtil.isTokenOwner(requestDto.getToken(), secretKey, requestDto.getUserEmail())) {
+            throw new AppException(ErrorCode.WRONG_ACCEPT);
         }
-        User user = userRepository.findByUserEmail(requestDto.getUserEmail()).orElseThrow(
-                () -> new AppException(ErrorCode.USER_DONT_EXIST, "존재하지 않는 계정입니다.")
-        );
         Post post = postRepository.findByUserAndPostId(user, requestDto.getPostId()).orElseThrow(
-                () -> new AppException(ErrorCode.POSTS_DONT_EXIST,"존재하지 않는 포스트입니다.")
+                () -> new AppException(ErrorCode.POSTS_DONT_EXIST)
         );
 
         postRepository.delete(post);
         return true;
     }
 
-
-
-
-    public void makeDummyData(){
-        for (int i = 0; i < 300; i++){
-            User user = User.builder().userNickName(i+"번째 유저").build();
-
-            userRepository.save(user);
-
-            Post post = Post.builder()
-                    .user(user)
-                    .title(i + "번째 게시글")
-                    .content(i + "번째 내용")
-                    .build();
-
-            postRepository.save(post);
-        }
-    }
 }

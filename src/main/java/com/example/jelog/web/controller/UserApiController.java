@@ -7,10 +7,13 @@ import com.example.jelog.web.dto.user.DeleteUserRequestDto;
 import com.example.jelog.web.dto.user.GetUserDetailRequestDto;
 import com.example.jelog.web.dto.user.LoginRequestDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -53,6 +56,7 @@ public class UserApiController {
         user.setUserPw(null);
         return ResponseEntity.ok(user);
     }
+
 
     // ID 조회
     @GetMapping("/public/user/valid")

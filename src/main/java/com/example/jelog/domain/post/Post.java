@@ -53,20 +53,25 @@ public class Post {
     private String content;
 
     @Column
+    private String thumbnail;
+
+    @Column
     @Convert(converter = StringListConverter.class)
     private List<String> tags;
 
     @Builder
-    public Post(User user, String title, String content, List<String> tags) {
+    public Post(User user, String title, String thumbnail, String content, List<String> tags) {
         this.user = user;
         this.title = title;
+        this.thumbnail = thumbnail;
         this.content = content;
         this.tags = tags;
     }
 
-    public void update(String title, String content, List<String> tags){
+    public void update(String title, String content, String thumbnail, List<String> tags){
         this.title = title;
         this.content = content;
+        this.thumbnail = thumbnail;
         this.tags = tags;
     }
 }

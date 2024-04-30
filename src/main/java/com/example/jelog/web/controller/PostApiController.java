@@ -1,12 +1,15 @@
 package com.example.jelog.web.controller;
 
 import com.example.jelog.domain.post.Post;
+import com.example.jelog.domain.user.User;
 import com.example.jelog.service.post.PostService;
+import com.example.jelog.service.user.UserService;
 import com.example.jelog.web.dto.post.AddPostRequestDto;
 import com.example.jelog.web.dto.post.DeletePostRequestDto;
 import com.example.jelog.web.dto.post.LikePostRequestDto;
 import com.example.jelog.web.dto.post.UnlikePostRequestDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +24,12 @@ import java.util.Map;
 @RequestMapping("/api")
 public class PostApiController {
     private final PostService postService;
-
+    private final UserService userService;
     // 글 작성
     @PostMapping("/private/post")
     public ResponseEntity<String> write(@RequestBody AddPostRequestDto requestDto){
-        boolean result = postService.write(requestDto);
+        User user = userService.findByUserEmail(requestDto.getUserEmail());
+        boolean result = postService.write(requestDto, user);
 
         if(result) return ResponseEntity.ok("게시글 등록 완료");
         else return ResponseEntity.badRequest().body("게시글 등록 실패");
@@ -33,35 +37,47 @@ public class PostApiController {
 
     // 글 불러오기
     @GetMapping("/public/post/all")
-    public ResponseEntity<List<Post>> getPosts(@RequestParam String orderBy, @PageableDefault(size = 10, sort = "postId") Pageable pageable){
-        List<Post> posts;
+    public ResponseEntity<Page<Post>> getPosts(@RequestParam String orderBy, @PageableDefault(size = 10, sort = "postId") Pageable pageable){
+        Page<Post> posts;
         if (orderBy.equals("createdAt")) {
-            posts = postService.getPostsOrderByCreatedAtDesc(pageable);
+            posts = postService.findAllOrderByCreatedAtDesc(pageable);
         } else {
-            posts = postService.getPostsOrderByPostLikesAtDesc();
+            posts = postService.findAll(pageable);
         }
 
         return ResponseEntity.ok(posts);
     }
 
     @GetMapping("/public/post/all/by")
-    public ResponseEntity<List<Post>> getPostsByUserId(@RequestParam Long userId) {
-        List<Post> posts = postService.getPostsByUserId(userId);
+    public ResponseEntity<List<Post>> getPostsByUserId(@RequestParam Long userId, @PageableDefault(size = 10, sort = "postId") Pageable pageable) {
+        User user = userService.findById(userId);
+        List<Post> posts = postService.findByUserOrderByCreatedAt(user, "desc");
 
         return ResponseEntity.ok(posts);
     }
 
     @GetMapping("/public/post/recent")
-    public ResponseEntity<Map<String, Post>> getRecentPosts(@RequestParam Long userId, @RequestParam Long postId){
-        Map<String, Post> recentPosts = postService.getRecentPostsByUserId(userId, postId);
+    public ResponseEntity<Map<String, Post>> getRecentPosts(@RequestParam Long userId, @RequestParam Long postId, @PageableDefault Pageable pageable){
+        User user = userService.findById(userId);
+
+        Map<String, Post> recentPosts = postService.findRecentPostByUser(user, postId);
 
         return ResponseEntity.ok(recentPosts);
     }
     @GetMapping("/public/post/{userNickName}/{postId}")
-    public ResponseEntity<Post> getPost(@PathVariable String userNickName, @PathVariable Long postId){
-        Post post = postService.getPost(userNickName, postId);
+    public ResponseEntity<Post> getPostByPostIdAndUser(@PathVariable String userNickName, @PathVariable Long postId){
+        User user = userService.findByUserNickName(userNickName);
+        Post post = postService.findByUserAndPostId(user, postId);
         post.getUser().setUserPw(null);
         return ResponseEntity.ok(post);
+    }
+
+
+    @GetMapping("/public/post")
+    public ResponseEntity<Map<String, Object>> getUserDetail(@RequestParam String userNickName){
+        User user = userService.findByUserNickName(userNickName);
+        Map<String, Object> res = postService.findByUser(user);
+        return ResponseEntity.ok(res);
     }
 
 
@@ -82,14 +98,10 @@ public class PostApiController {
 
     @DeleteMapping("/private/post")
     public ResponseEntity<String> deletePost(@RequestBody DeletePostRequestDto requestDto){
-        boolean result = postService.deletePost(requestDto);
+        User user = userService.findByUserEmail(requestDto.getUserEmail());
+        boolean result = postService.deletePost(requestDto, user);
 
-        return ResponseEntity.ok("게시글이 삭제되었습니다.");
+        return ResponseEntity.ok("게시글 삭제 결과 : " + result);
     }
 
-    @GetMapping("/public/post/test")
-    public ResponseEntity<String> makeDummyData(){
-        postService.makeDummyData();
-        return ResponseEntity.ok("더미 데이터 생성 완료");
-    }
 }

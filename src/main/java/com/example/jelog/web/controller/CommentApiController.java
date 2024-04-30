@@ -14,14 +14,14 @@ public class CommentApiController {
 
     private final CommentService commentService;
 
-    @PostMapping("/write")
+    @PostMapping()
     public ResponseEntity<String> writeComment(@RequestBody AddCommentRequestDto requestDto){
         boolean result = commentService.write(requestDto);
 
         return ResponseEntity.ok("등록 결과 : " + result);
     }
 
-    @PutMapping("/write")
+    @PutMapping()
     public ResponseEntity<String> modifyComment(@RequestBody ModifyCommentRequestDto requestDto){
         boolean result = commentService.modify(requestDto);
 

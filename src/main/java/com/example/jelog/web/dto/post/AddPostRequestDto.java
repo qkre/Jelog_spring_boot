@@ -12,5 +12,6 @@ public class AddPostRequestDto {
     private String userEmail;
     private String title;
     private String content;
+    private String thumbnail;
     private List<String> tags;
 }

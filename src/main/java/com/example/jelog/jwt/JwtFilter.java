@@ -25,11 +25,16 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        final String requestUrl = request.getRequestURI();
         final String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
 
+        if(requestUrl.contains("/public")){
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         if(authorization == null || !authorization.startsWith("Bearer ")){
-            logger.error("Authorization 이 없습니다.");
+            logger.error(requestUrl + "::: Authorization 이 없습니다.");
             filterChain.doFilter(request, response);
             return;
         }

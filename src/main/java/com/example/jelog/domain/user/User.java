@@ -26,13 +26,16 @@ public class User {
     @Column
     private String userNickName;
 
+    @Column(columnDefinition = "VARCHAR(255) default '자기소개를 입력하세요.'")
+    private String userIntroduction;
+
     @Column
     private String userPw;
 
     @Column
     private String userIcon;
 
-    @Column
+    @Column(columnDefinition = "VARCHAR(10) default 'USER'")
     private String role;
 
 
